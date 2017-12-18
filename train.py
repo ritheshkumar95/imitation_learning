@@ -8,8 +8,8 @@ from losses import GaussianNLL
 
 
 N_IMAGES = 4
-BATCH_SIZE = 64
-LEARN_RATE = 0.0001
+BATCH_SIZE = 128
+LEARN_RATE = 0.001
 PRINT_FREQ = 10
 NB_EPOCHS = 50
 K = 10

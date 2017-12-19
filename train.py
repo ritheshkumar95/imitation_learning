@@ -26,7 +26,7 @@ def network(images):
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
         'Conv4', out, 64, 64, 5, 2, batchnorm=True), .02)
     out = tf.nn.leaky_relu(lib.ops.Linear(
-        'fc1', tf.reshape(out, (batch_size, -1)), 64 * 5 * 4, 512, batchnorm=True),
+        'fc1', tf.reshape(out, (batch_size, -1)), 64 * 5 * 4, 512, batchnorm=False),
         .02
         )
     out = lib.ops.Linear('fc2', out, 512, 2)
@@ -46,7 +46,9 @@ def loop(which_set='train'):
             control: batch_control
         })
 
-        out_control = np.random.normal(loc=out[1][:, 0], scale=np.exp(out[1][:, 1]*.5))
+        #out_control = np.random.normal(loc=out[1][:, 0], scale=np.exp(out[1][:, 1]*.5))
+        
+        out_control = out[1][:, 0]
         # out_control = np.random.normal(loc=out[1][:, 0], scale=1.)
         loss2 = np.mean(np.abs(out_control - batch_control))
         losses.append([out[0], loss2])
@@ -62,9 +64,12 @@ images = tf.placeholder(tf.float32, [None, None, None, None])
 control = tf.placeholder(tf.float32, [None])
 
 output = network(images)
-loss = tf.reduce_mean(
-    GaussianNLL(control, output[:, 0], output[:, 1])
-)
+#loss = tf.reduce_mean(
+#    GaussianNLL(control, output[:, 0], output[:, 1])
+#)
+
+loss = 10.0 * tf.reduce_mean(tf.abs(output[:,0] - control))
+
 # loss = tf.reduce_mean(
 #     StandardGaussianNLL(control, output)
 # )
@@ -92,3 +97,5 @@ for i in xrange(NB_EPOCHS):
     loop('train')
     print "Validating..."
     loop('valid')
+
+

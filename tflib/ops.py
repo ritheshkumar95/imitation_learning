@@ -115,7 +115,7 @@ def Conv2D(
     depth, n_filters, kernel, stride,
     **kwargs
 ):
-    with tf.name_scope(name) as scope:
+    with tf.name_scope(name):
         filter_values = weight_initializer(
             kwargs.get('init', 'GlorotUniform'),
             (kernel, kernel, depth, n_filters), gain=kwargs.get('activation', 'relu')

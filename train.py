@@ -4,7 +4,7 @@ from data_loader import Dataset
 import numpy as np
 
 
-N_IMAGES = 4
+N_IMAGES = 16
 BATCH_SIZE = 128
 LEARN_RATE = 0.001
 PRINT_FREQ = 10
@@ -49,7 +49,7 @@ def loop(which_set='train'):
         out = sess.run(run_vars, feed_dict={
             images: batch_img,
             control: batch_control,
-            drop_prob: 0.5 if which_set == 'train' else 1.0,
+            keep_prob: 0.5 if which_set == 'train' else 1.0,
             batchnorm_mode: which_set == 'train'
         })
         losses.append([out[0]])
@@ -64,10 +64,10 @@ dset = Dataset(N_IMAGES-1)
 
 images = tf.placeholder(tf.float32, [None, None, None, None])
 control = tf.placeholder(tf.float32, [None])
-drop_prob = tf.placeholder(tf.float32)
+keep_prob = tf.placeholder(tf.float32)
 batchnorm_mode = tf.placeholder(tf.bool)
 
-output = network(images, drop_prob, batchnorm_mode)
+output = network(images, keep_prob, batchnorm_mode)
 loss = tf.reduce_mean(tf.abs(output[:, 0] - control))
 optimizer = tf.train.AdamOptimizer(learning_rate=LEARN_RATE)
 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -75,6 +75,12 @@ with tf.control_dependencies(update_ops):
     train_op = optimizer.minimize(loss)
 
 lib.print_params_info()
+
+tf.add_to_collection("images", images)
+tf.add_to_collection("control", control)
+tf.add_to_collection("keep_prob", keep_prob)
+tf.add_to_collection("batchnorm_mode", batchnorm_mode)
+tf.add_to_collection("output", output)
 
 sess = tf.Session()
 saver = tf.train.Saver()

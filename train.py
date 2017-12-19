@@ -18,16 +18,19 @@ K = 10
 def network(images):
     batch_size = tf.shape(images)[0]
 
-    images = tf.nn.dropout(images,0.5)
+    images = tf.nn.dropout(images,0.5)#tf.random_normal(shape = tf.shape(images), mean = 0.0, stddev = 0.1, dtype = tf.float32)
+
+    #images = tf.random_crop(images,(batch_size,4,54,72))
 
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
-        'Conv1', images, N_IMAGES, 32, 5, 2, batchnorm=True), .02)
+        'Conv1', images, N_IMAGES*1, 32, 5, 2, batchnorm=True), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
         'Conv2', out, 32, 32, 5, 2, batchnorm=True), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
         'Conv3', out, 32, 64, 5, 2, batchnorm=True), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
         'Conv4', out, 64, 64, 5, 2, batchnorm=True), .02)
+
     out = tf.nn.leaky_relu(lib.ops.Linear(
         'fc1', tf.reshape(out, (batch_size, -1)), 64 * 5 * 4, 512, batchnorm=False),
         .02

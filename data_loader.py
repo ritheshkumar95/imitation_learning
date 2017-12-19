@@ -26,7 +26,7 @@ class Dataset(object):
                 batch_images.append(
                     np.stack(
                         self.hdf5['image'][idx-self.n_back_images:idx+1], 0
-                        ).reshape(self.n_back_images+1, 60, 80, 3)
+                        ).reshape(self.n_back_images+1, 60, 80, 1)
                     )
                 batch_control.append(self.hdf5['control'][idx][1])
 

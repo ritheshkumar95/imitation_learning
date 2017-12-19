@@ -91,5 +91,5 @@ for i in xrange(NB_EPOCHS):
     if cost < BEST_COST:
         BEST_COST = cost
         print "Saving Model!"
-        saver.save(sess, 'best_model.ckpt')
-        saver.export_meta_graph('best_model.meta')
+        saver.save(sess, './best_model.ckpt')
+        saver.export_meta_graph('./best_model.meta')

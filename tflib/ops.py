@@ -102,6 +102,11 @@ def Linear(
 
             result = tf.nn.bias_add(result, b)
 
+        if kwargs.get('batchnorm', False):
+            result = tf.layers.batch_normalization(
+                inputs=result, axis=-1, training=kwargs.get('training_mode', True)
+            )
+
         return result
 
 
@@ -152,10 +157,8 @@ def Conv2D(
             # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             # with tf.control_dependencies(update_ops):
             #    train_op = optimizer.minimize(loss)
-
-            out = tf.contrib.layers.batch_norm(
-                inputs=out, scope=scope, center=True, scale=True,
-                is_training=kwargs.get('training_mode', True), data_format='NCHW'
+            out = tf.layers.batch_normalization(
+                inputs=out, axis=1, training=kwargs.get('training_mode', True)
                 )
 
         return out

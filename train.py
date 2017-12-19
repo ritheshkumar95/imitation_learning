@@ -17,6 +17,9 @@ K = 10
 
 def network(images):
     batch_size = tf.shape(images)[0]
+
+    images = tf.nn.dropout(images,0.5)
+
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
         'Conv1', images, N_IMAGES, 32, 5, 2, batchnorm=True), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
@@ -29,6 +32,9 @@ def network(images):
         'fc1', tf.reshape(out, (batch_size, -1)), 64 * 5 * 4, 512, batchnorm=False),
         .02
         )
+
+    out = tf.nn.dropout(out,0.5)
+
     out = lib.ops.Linear('fc2', out, 512, 2)
     return out
 
@@ -68,7 +74,7 @@ output = network(images)
 #    GaussianNLL(control, output[:, 0], output[:, 1])
 #)
 
-loss = 10.0 * tf.reduce_mean(tf.abs(output[:,0] - control))
+loss = 1.0 * tf.reduce_mean(tf.abs(output[:,0] - control))
 
 # loss = tf.reduce_mean(
 #     StandardGaussianNLL(control, output)

@@ -1,14 +1,14 @@
 import h5py
 import numpy as np
-from torchvision.utils import save_image
-import torch
+#from torchvision.utils import save_image
+#import torch
 
 
 class Dataset(object):
     def __init__(self, n_back_images=3):
-        self.hdf5 = h5py.File('/data/lisa/data/duckie_data/data_grayscale.hdf5', 'r')
+        self.hdf5 = h5py.File('./data/data_grayscale.hdf5', 'r')
         self.n_back_images = n_back_images
-        self.len_data = len(self.hdf5[self.hdf5.keys()[0]])
+        self.len_data = len(self.hdf5['image'])
         self.idxs = {}
         idxs = np.arange(n_back_images, self.len_data)
         np.random.seed(111)
@@ -18,7 +18,7 @@ class Dataset(object):
 
     def create_rgb_epoch_iterator(self, which_set='train', batch_size=32):
         idxs = self.idxs[which_set]
-        for i in xrange(0, len(idxs), batch_size):
+        for i in range(0, len(idxs), batch_size):
             batch_idxs = idxs[i: i+batch_size]
             batch_images = []
             batch_control = []
@@ -35,11 +35,11 @@ class Dataset(object):
                 ).transpose(0, 1, 4, 2, 3).reshape(-1, 3*(self.n_back_images+1), 60, 80)
             batch_control = np.asarray(batch_control)
 
-            yield (2*(batch_images/255.)-1.).astype('float32'), batch_control.astype('float32')
+            yield (2*(batch_images[:, :, :, 10:-10]/255.)-1.).astype('float32'), batch_control.astype('float32')
 
     def create_gray_epoch_iterator(self, which_set='train', batch_size=32):
         idxs = self.idxs[which_set]
-        for i in xrange(0, len(idxs), batch_size):
+        for i in range(0, len(idxs), batch_size):
             batch_idxs = idxs[i: i+batch_size]
             batch_images = []
             batch_control = []

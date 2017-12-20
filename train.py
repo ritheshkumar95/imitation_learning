@@ -4,34 +4,31 @@ from data_loader import Dataset
 import numpy as np
 
 
-N_IMAGES = 16
+N_IMAGES = 4
 BATCH_SIZE = 128
 LEARN_RATE = 0.001
 PRINT_FREQ = 10
 NB_EPOCHS = 100
 
 
-def network(images, dropout, bn_mode):
+def network(images, dropout):
     batch_size = tf.shape(images)[0]
+    images = tf.random_crop(images, [batch_size, N_IMAGES, 60, 60])
     images = tf.nn.dropout(images, dropout)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
-        'Conv1', images, N_IMAGES, 32, 5, 2,
-        batchnorm=True, training_mode=bn_mode
+        'Conv1', images, N_IMAGES, 8, 5, 3
         ), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
-        'Conv2', out, 32, 32, 5, 2,
-        batchnorm=True, training_mode=bn_mode
+        'Conv2', out, 8, 8, 5, 2
         ), .02)
     out = tf.nn.leaky_relu(lib.ops.Conv2D(
-        'Conv3', out, 32, 64, 5, 2,
-        batchnorm=True, training_mode=bn_mode
+        'Conv3', out, 8, 16, 5, 2
         ), .02)
-    out = tf.nn.leaky_relu(lib.ops.Conv2D(
-        'Conv4', out, 64, 64, 5, 2,
-        batchnorm=True, training_mode=bn_mode
-        ), .02)
+    # out = tf.nn.leaky_relu(lib.ops.Conv2D(
+    #     'Conv4', out, 16, 32, 5, 2
+    #     ), .02)
     out = tf.nn.leaky_relu(lib.ops.Linear(
-            'fc1', tf.reshape(out, (batch_size, -1)), 64 * 5 * 4, 512
+            'fc1', tf.reshape(out, (batch_size, -1)), 16 * 5 * 5, 512
         ), .02)
     out = tf.nn.dropout(out, dropout)
     out = lib.ops.Linear('fc2', out, 512, 1)
@@ -49,8 +46,7 @@ def loop(which_set='train'):
         out = sess.run(run_vars, feed_dict={
             images: batch_img,
             control: batch_control,
-            keep_prob: 0.5 if which_set == 'train' else 1.0,
-            batchnorm_mode: which_set == 'train'
+            keep_prob: 0.5 if which_set == 'train' else 1.0
         })
         losses.append([out[0]])
         if which_set == 'train' and (i+1) % PRINT_FREQ == 0:
@@ -62,12 +58,11 @@ def loop(which_set='train'):
 
 dset = Dataset(N_IMAGES-1)
 
-images = tf.placeholder(tf.float32, [None, None, None, None])
-control = tf.placeholder(tf.float32, [None])
-keep_prob = tf.placeholder(tf.float32)
-batchnorm_mode = tf.placeholder(tf.bool)
+images = tf.placeholder(tf.float32, [None, None, None, None], name="images")
+control = tf.placeholder(tf.float32, [None], name="control")
+keep_prob = tf.placeholder(tf.float32, name="keep_prob")
 
-output = network(images, keep_prob, batchnorm_mode)
+output = network(images, keep_prob)
 loss = tf.reduce_mean(tf.abs(output[:, 0] - control))
 optimizer = tf.train.AdamOptimizer(learning_rate=LEARN_RATE)
 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -79,11 +74,10 @@ lib.print_params_info()
 tf.add_to_collection("images", images)
 tf.add_to_collection("control", control)
 tf.add_to_collection("keep_prob", keep_prob)
-tf.add_to_collection("batchnorm_mode", batchnorm_mode)
 tf.add_to_collection("output", output)
 
 sess = tf.Session()
-saver = tf.train.Saver()
+saver = tf.train.Saver(tf.global_variables())
 sess.run(tf.global_variables_initializer())
 
 
@@ -98,4 +92,4 @@ for i in xrange(NB_EPOCHS):
         BEST_COST = cost
         print "Saving Model!"
         saver.save(sess, './best_model.ckpt')
-        saver.export_meta_graph('./best_model.meta')
+        # saver.export_meta_graph('./best_model.meta')

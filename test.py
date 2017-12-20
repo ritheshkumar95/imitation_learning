@@ -2,7 +2,7 @@ import tensorflow as tf
 from data_loader import Dataset
 
 
-N_IMAGES = 16
+N_IMAGES = 4
 
 dset = Dataset(N_IMAGES - 1)
 itr = dset.create_gray_epoch_iterator('valid', 8)

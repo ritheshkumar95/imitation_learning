@@ -7,7 +7,7 @@ from pytorch2caffe import pytorch2caffe
 from visualize import make_dot
 
 
-N_IMAGES = 4
+N_IMAGES = 1
 BATCH_SIZE = 128
 LEARN_RATE = 0.001
 PRINT_FREQ = 10
@@ -25,7 +25,7 @@ class Network(nn.Module):
             nn.Conv2d(16, 16, 5, 2, 2),
             nn.ReLU(),
             nn.Conv2d(16, 32, 5, 2, 2),
-            nn.ReLU()
+            nn.ReLU(),
         )
         self.fc_part = nn.Sequential(
             nn.Linear(32 * 4 * 5, 512),

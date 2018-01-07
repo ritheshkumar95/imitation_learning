@@ -3,7 +3,7 @@ from data_loader import Dataset
 from tqdm import tqdm
 import caffe
 
-N_IMAGES = 4
+N_IMAGES = 1
 
 caffe.set_mode_cpu()
 dset = Dataset(N_IMAGES - 1)

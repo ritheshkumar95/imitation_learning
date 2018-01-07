@@ -5,7 +5,7 @@ import numpy as np
 from torch.autograd import Variable
 
 
-N_IMAGES = 4
+N_IMAGES = 1
 BATCH_SIZE = 128
 LEARN_RATE = 0.001
 PRINT_FREQ = 10
@@ -15,7 +15,7 @@ NB_EPOCHS = 100
 class Network(nn.Module):
     def __init__(self):
         super(Network, self).__init__()
-        self.dropout = nn.Dropout(.5)
+        self.image_dropout = nn.Dropout(.5)
         self.conv_part = nn.Sequential(
             nn.Conv2d(N_IMAGES, 8, 5, 2, 2),
             nn.ReLU(),
@@ -34,7 +34,7 @@ class Network(nn.Module):
             )
 
     def forward(self, x):
-        x = self.dropout(x)
+        x = self.image_dropout(x)
         return self.fc_part(self.conv_part(x).view(x.size(0), -1))
 
 
@@ -47,6 +47,10 @@ def loop(which_set='train'):
 
         output_control = model(batch_img)
         loss = nn.L1Loss()(output_control.squeeze(), batch_control)
+        # loss = nn.CrossEntropyLoss()(
+        #     output_control, 
+        #     batch_control
+        #     )
 
         if which_set == 'train':
             opt.zero_grad()
@@ -74,7 +78,7 @@ for i in xrange(NB_EPOCHS):
     model.train()
     loop('train')
     print "Validating..."
-    model.eval()
+    # model.eval()
     cost = loop('valid')
     if cost < BEST_COST:
         BEST_COST = cost

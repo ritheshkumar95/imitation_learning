@@ -34,8 +34,11 @@ class Dataset(object):
                 batch_images, 0
                 ).transpose(0, 1, 4, 2, 3).reshape(-1, 3*(self.n_back_images+1), 60, 80)
             batch_control = np.asarray(batch_control)
+            batch_control = (batch_control+8.3)/16.6
+            batch_control = (batch_control*256).astype('int64')
+            # batch_control = (batch_control/32.)*16.6 - 8.3
 
-            yield (2*(batch_images[:, :, :, 10:-10]/255.)-1.).astype('float32'), batch_control.astype('float32')
+            yield (2*(batch_images[:, :, :, 10:-10]/255.)-1.).astype('float32'), batch_control
 
     def create_gray_epoch_iterator(self, which_set='train', batch_size=32):
         idxs = self.idxs[which_set]
@@ -52,8 +55,11 @@ class Dataset(object):
                 batch_control.append(self.hdf5['control'][idx][1])
 
             batch_images = np.stack(batch_images, 0)
-            batch_control = np.asarray(batch_control)
-            yield (2*(batch_images/255.)-1.).astype('float32'), batch_control.astype('float32')
+            batch_control = np.asarray(batch_control).astype('float32')
+            # batch_control = (batch_control + 8.3) / 16.7
+            # batch_control = (batch_control * 256).astype('int64')
+
+            yield (2*(batch_images/255.)-1.).astype('float32'), batch_control
 
 
 if __name__ == '__main__':
